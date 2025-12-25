@@ -7,7 +7,6 @@ const register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
 
-    // Check if user already exists
     const existingUser = await pool.query(
       'SELECT * FROM users WHERE email = $1',
       [email]
@@ -20,11 +19,9 @@ const register = async (req, res) => {
       });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
     const result = await pool.query(
       'INSERT INTO users (email, password, name) VALUES ($1, $2, $3) RETURNING id, email, name, created_at',
       [email, hashedPassword, name]
@@ -32,7 +29,6 @@ const register = async (req, res) => {
 
     const user = result.rows[0];
 
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET,
@@ -64,7 +60,6 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if user exists
     const result = await pool.query(
       'SELECT * FROM users WHERE email = $1',
       [email]
@@ -79,7 +74,6 @@ const login = async (req, res) => {
 
     const user = result.rows[0];
 
-    // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
@@ -89,7 +83,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET,
@@ -116,60 +109,4 @@ const login = async (req, res) => {
   }
 };
 
-// Verify token (middleware)
-const verifyToken = (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1]; // Bearer TOKEN
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        error: 'No token provided'
-      });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({
-      success: false,
-      error: 'Invalid or expired token'
-    });
-  }
-};
-
-// Get current user
-const getCurrentUser = async (req, res) => {
-  try {
-    const result = await pool.query(
-      'SELECT id, email, name, created_at FROM users WHERE id = $1',
-      [req.user.userId]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        error: 'User not found'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: result.rows[0]
-    });
-  } catch (error) {
-    console.error('Error in getCurrentUser:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to get user'
-    });
-  }
-};
-
-module.exports = {
-  register,
-  login,
-  verifyToken,
-  getCurrentUser
-};
+module.exports = {register,login};

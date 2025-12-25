@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+
 export default function Login() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -20,13 +22,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', formData);
-      
+      const response = await axios.post(`${API_URL}/auth/login`, formData);
+
       // Store token and user data
       localStorage.setItem('token', response.data.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.data.user));
       
-      // Redirect to dashboard
       router.push('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to login');
@@ -38,7 +39,6 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
-        {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2">
             <span className="text-5xl">🧬</span>
@@ -47,7 +47,6 @@ export default function Login() {
           <p className="text-gray-600 mt-2">Welcome back!</p>
         </div>
 
-        {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Login to Your Account</h2>
           

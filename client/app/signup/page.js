@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+
 export default function Signup() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -35,7 +37,7 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/register', {
+      const response = await axios.post(`${API_URL}/auth/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password,
