@@ -1,4 +1,4 @@
-# 🧬 Heredity - Interactive Family Health Tree
+# 🧬 genMap - Interactive Family Health Tree
 
 > A privacy-focused web application for building family trees, tracking genetic health conditions, and calculating hereditary disease risks using AI-powered analysis.
 
@@ -39,7 +39,7 @@
 
 ## 🎯 Overview
 
-**Heredity** is a full-stack application that helps users understand their genetic health risks by:
+**genMap** is a full-stack application that helps users understand their genetic health risks by:
 - Building comprehensive family trees
 - Tracking medical conditions across generations
 - Calculating hereditary disease probabilities using recursive algorithms

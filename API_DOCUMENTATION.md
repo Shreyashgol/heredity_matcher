@@ -1,4 +1,4 @@
-# Heredity API Documentation
+# genMap API Documentation
 
 ## Enhanced Features
 

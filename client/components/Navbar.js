@@ -26,7 +26,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center space-x-2 group">
           <span className="text-3xl group-hover:scale-110 transition-transform duration-300">🧬</span>
           <span className={`text-2xl font-bold ${isScrolled ? 'text-indigo-900' : 'text-indigo-900'} tracking-tight`}>
-            Heredity
+            genMap
           </span>
         </Link>
 
