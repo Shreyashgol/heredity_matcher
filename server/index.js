@@ -5,12 +5,30 @@ const session = require('express-session');
 const passport = require('./config/passport');
 
 dotenv.config();
-const client_url = process.env.CLIENT_URL
 
 const app = express();
 
+// CORS configuration - allow both production and development
+const allowedOrigins = [
+  'https://heredity-matcher-ihp.vercel.app', // Production frontend
+  'http://localhost:3000', // Development frontend
+  process.env.CLIENT_URL // From environment variable
+].filter(Boolean); // Remove undefined values
+
+console.log('Allowed CORS origins:', allowedOrigins);
+
 app.use(cors({
-  origin: `${client_url}`,
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -27,7 +45,8 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Set to true in production with HTTPS
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   })
@@ -39,6 +58,7 @@ app.use(passport.session());
 
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
+const { verifyToken } = require('./middleware/middleware');
 const path = require('path');
 
 // console.log('✓ Routes imported');
@@ -55,7 +75,40 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'Heredity API Server - Family Health Tree',
     status: 'running',
-    version: '1.0.0'
+    version: '1.0.0',
+    cors: {
+      allowedOrigins: [
+        'https://heredity-matcher-ihp.vercel.app',
+        'http://localhost:3000',
+        process.env.CLIENT_URL
+      ].filter(Boolean)
+    }
+  });
+});
+
+// Debug endpoint to test auth (no auth required)
+app.get('/api/test-auth', (req, res) => {
+  const authHeader = req.headers.authorization;
+  res.json({
+    hasAuthHeader: !!authHeader,
+    authHeader: authHeader ? authHeader.substring(0, 30) + '...' : 'none',
+    headers: Object.keys(req.headers),
+    origin: req.headers.origin || 'none',
+    referer: req.headers.referer || 'none',
+    jwtSecretConfigured: !!process.env.JWT_SECRET,
+    jwtSecretLength: process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0,
+    clientUrlConfigured: !!process.env.CLIENT_URL,
+    clientUrl: process.env.CLIENT_URL || 'not set'
+  });
+});
+
+// Debug endpoint to test protected route
+app.get('/api/test-protected', verifyToken, (req, res) => {
+  res.json({
+    success: true,
+    message: 'Authentication successful!',
+    userId: req.user.userId,
+    userEmail: req.user.email
   });
 });
 
