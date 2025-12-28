@@ -2,19 +2,32 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const generateRiskReport = async (data) => {
   try {
+    if (!data.patientName || (!data.conditionName && !data.condition)) {
+      console.error('Missing required data for AI report generation:', data);
+      return {
+        success: false,
+        report: 'Unable to generate AI report: Missing patient information',
+        error: 'Missing required data',
+        generatedAt: new Date().toISOString()
+      };
+    }
+
     if (!process.env.GEMINI_API_KEY) {
       console.warn('GEMINI_API_KEY is not set. Skipping AI report generation.');
       return {
         success: false,
-        report: null,
-        error: 'API key not configured'
+        report: 'AI report generation is currently unavailable. Please configure the Gemini API key.',
+        error: 'API key not configured',
+        generatedAt: new Date().toISOString()
       };
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-
-    // Build family history details
+     
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-pro'
+    })
+    
     const familyHistoryDetails = data.affectedAncestors
       .map(a => {
         const generationName = {
@@ -32,7 +45,7 @@ const generateRiskReport = async (data) => {
 
 PATIENT INFORMATION:
 - Name: ${data.patientName}
-- Condition of Interest: ${data.conditionName}
+- Condition of Interest: ${data.conditionName || data.condition}
 - Calculated Genetic Risk: ${data.totalRisk}%
 - Risk Classification: ${data.riskLevel}
 
@@ -48,13 +61,13 @@ Create a professional, detailed medical report with the following structure:
    - Explain what this means in practical terms
 
 2. **GENETIC RISK ANALYSIS**
-   - Explain the inheritance pattern for ${data.conditionName}
+   - Explain the inheritance pattern for ${data.conditionName || data.condition}
    - Detail how family history contributes to the patient's risk
    - Analyze the significance of affected relatives by generation
    - Discuss the cumulative effect of multiple affected family members
 
 3. **DISEASE OVERVIEW**
-   - Describe ${data.conditionName} in medical terms
+   - Describe ${data.conditionName || data.condition} in medical terms
    - Explain early warning signs and symptoms
    - Discuss prevalence in the general population vs. with family history
 
@@ -109,11 +122,15 @@ FORMAT:
 - Use bullet points for lists
 - Keep paragraphs concise and focused
 - Highlight key recommendations
-- Make it suitable for printing as a medical report`;
+- Make it suitable for printing as a medical report
+
+IMPORTANT: Generate a complete, detailed report of at least 800 words. Be thorough and comprehensive.`;
 
     const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const response = result.response;
     const text = response.text();
+    
+    console.log('AI report generated successfully. Length:', text.length, 'characters');
     
     return {
       success: true,
@@ -123,11 +140,20 @@ FORMAT:
     };
   } catch (error) {
     console.error('Error generating AI report:', error);
-    return {
-      success: false,
-      report: null,
-      error: error.message || 'Failed to generate report'
-    };
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      data: {
+        patientName: data.patientName,
+        condition: data.conditionName || data.condition,
+        totalRisk: data.totalRisk
+      }
+    });
+    
+    // Use fallback report generation
+    console.log('Using fallback report generation...');
+    const { generateFallbackReport } = require('./fallbackReportService');
+    return generateFallbackReport(data);
   }
 };
 

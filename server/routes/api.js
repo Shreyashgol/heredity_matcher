@@ -18,8 +18,8 @@ router.use(verifyToken);
 
 // Person routes
 router.post('/person', addPerson);
-router.get('/people', getAllPeople); // Legacy endpoint
-router.get('/people/filtered', getPeopleWithFilters); // New enhanced endpoint
+router.get('/people', getAllPeople); 
+router.get('/people/filtered', getPeopleWithFilters); 
 router.put('/person/:personId', updatePerson);
 router.delete('/person/:personId', deletePerson);
 
@@ -39,12 +39,10 @@ router.get('/risk/:personId/:conditionName', calculateRisk);
 // History route
 router.get('/history', getActivityHistory);
 
-// Report generation endpoint
 router.post('/generate-report-pdf', async (req, res) => {
   try {
     const { patientName, condition, totalRisk, riskLevel, affectedAncestors, aiReport, generatedAt, treeData } = req.body;
 
-    // Validate required fields
     if (!patientName || !condition || totalRisk === undefined) {
       return res.status(400).json({
         success: false,
@@ -52,7 +50,6 @@ router.post('/generate-report-pdf', async (req, res) => {
       });
     }
 
-    // Validate patientName is a string
     if (typeof patientName !== 'string' || patientName.trim().length === 0) {
       return res.status(400).json({
         success: false,
@@ -60,7 +57,6 @@ router.post('/generate-report-pdf', async (req, res) => {
       });
     }
 
-    // Validate condition is a string
     if (typeof condition !== 'string' || condition.trim().length === 0) {
       return res.status(400).json({
         success: false,
@@ -68,7 +64,6 @@ router.post('/generate-report-pdf', async (req, res) => {
       });
     }
 
-    // Validate totalRisk is a number
     if (typeof totalRisk !== 'number' || totalRisk < 0 || totalRisk > 100) {
       return res.status(400).json({
         success: false,
@@ -76,7 +71,6 @@ router.post('/generate-report-pdf', async (req, res) => {
       });
     }
 
-    // Validate treeData if provided
     if (treeData && !Array.isArray(treeData)) {
       return res.status(400).json({
         success: false,
@@ -84,7 +78,6 @@ router.post('/generate-report-pdf', async (req, res) => {
       });
     }
 
-    // Validate affectedAncestors if provided
     if (affectedAncestors && !Array.isArray(affectedAncestors)) {
       return res.status(400).json({
         success: false,

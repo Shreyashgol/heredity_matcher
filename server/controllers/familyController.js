@@ -2,13 +2,11 @@ const pool = require('../config/db');
 const { generateRiskReport } = require('../services/geminiService');
 const { logActivity } = require('./enhancedFamilyController');
 
-// Add a new person
 const addPerson = async (req, res) => {
   try {
     const { name, birth_date, gender } = req.body;
     const userId = req.user?.userId;
 
-    // Validate input
     if (!name || !birth_date || !gender) {
       return res.status(400).json({
         success: false,
@@ -23,7 +21,6 @@ const addPerson = async (req, res) => {
       });
     }
 
-    // Validate birth date is not in future
     if (new Date(birth_date) > new Date()) {
       return res.status(400).json({
         success: false,
@@ -36,7 +33,6 @@ const addPerson = async (req, res) => {
       [name, birth_date, gender, userId]
     );
     
-    // Log activity
     await logActivity(userId, 'CREATE', 'PERSON', result.rows[0].id, {
       name, birth_date, gender
     });
@@ -54,7 +50,6 @@ const addPerson = async (req, res) => {
   }
 };
 
-// Add a relationship (parent-child)
 const addRelationship = async (req, res) => {
   try {
     const { parent_id, child_id, type } = req.body;
@@ -72,7 +67,6 @@ const addRelationship = async (req, res) => {
       [parent_id, child_id, type]
     );
     
-    // Log activity
     await logActivity(userId, 'CREATE', 'RELATIONSHIP', result.rows[0].id, {
       parent_id, child_id, type
     });
@@ -90,7 +84,6 @@ const addRelationship = async (req, res) => {
   }
 };
 
-// Add a condition to a person
 const addCondition = async (req, res) => {
   try {
     const { person_id, condition_name, diagnosed_date } = req.body;
@@ -101,7 +94,6 @@ const addCondition = async (req, res) => {
       [person_id, condition_name, diagnosed_date]
     );
     
-    // Log activity
     await logActivity(userId, 'CREATE', 'CONDITION', result.rows[0].id, {
       person_id, condition_name, diagnosed_date
     });
@@ -119,7 +111,6 @@ const addCondition = async (req, res) => {
   }
 };
 
-// Get all people (user-specific)
 const getAllPeople = async (req, res) => {
   try {
     const userId = req.user?.userId;
@@ -149,7 +140,6 @@ const getAllPeople = async (req, res) => {
   }
 };
 
-// Get family tree with ancestors using Recursive CTE
 const getFamilyTree = async (req, res) => {
   try {
     const { personId } = req.params;
@@ -162,7 +152,6 @@ const getFamilyTree = async (req, res) => {
       });
     }
 
-    // Verify person belongs to user
     const personCheck = await pool.query(
       'SELECT id FROM people WHERE id = $1 AND user_id = $2',
       [personId, userId]
@@ -240,7 +229,6 @@ const getFamilyTree = async (req, res) => {
   }
 };
 
-// Calculate risk for a specific condition
 const calculateRisk = async (req, res) => {
   try {
     const { personId, conditionName } = req.params;
@@ -253,7 +241,6 @@ const calculateRisk = async (req, res) => {
       });
     }
 
-    // Verify person belongs to user
     const personCheck = await pool.query(
       'SELECT id, name FROM people WHERE id = $1 AND user_id = $2',
       [personId, userId]
@@ -331,7 +318,7 @@ const calculateRisk = async (req, res) => {
     totalRisk = Math.min(totalRisk, 100);
     const riskLevel = totalRisk > 50 ? 'High' : totalRisk > 25 ? 'Medium' : totalRisk > 0 ? 'Low' : 'None';
     
-    // Generate AI report
+
     const aiReportResult = await generateRiskReport({
       patientName,
       conditionName,
@@ -340,7 +327,6 @@ const calculateRisk = async (req, res) => {
       affectedAncestors
     });
 
-    // Log activity
     await logActivity(userId, 'CALCULATE_RISK', 'REPORT', personId, {
       patientName,
       condition: conditionName,
