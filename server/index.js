@@ -8,18 +8,16 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration - allow both production and development
 const allowedOrigins = [
-  'https://heredity-matcher-ihp.vercel.app', // Production frontend
-  'http://localhost:3000', // Development frontend
-  process.env.CLIENT_URL // From environment variable
-].filter(Boolean); // Remove undefined values
+  'https://heredity-matcher-ihp.vercel.app',
+  'http://localhost:3000',
+  process.env.CLIENT_URL 
+].filter(Boolean); 
 
 console.log('Allowed CORS origins:', allowedOrigins);
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -34,11 +32,8 @@ app.use(cors({
   credentials: true
 }));
 
-// console.log('✓ CORS configured');
-
 app.use(express.json());
 
-// Session configuration
 app.use(
   session({
     secret: process.env.JWT_SECRET,
@@ -52,16 +47,14 @@ app.use(
   })
 );
 
-// Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
 const { verifyToken } = require('./middleware/middleware');
-const path = require('path');
+const path = req
 
-// console.log('✓ Routes imported');
 
 // Serve static files from reports directory (public access for PDF downloads)
 // Must be BEFORE /api routes to avoid authentication middleware
@@ -70,23 +63,7 @@ app.use('/api/reports', express.static(path.join(__dirname, 'reports')));
 app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
 
-// Health check route
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Heredity API Server - Family Health Tree',
-    status: 'running',
-    version: '1.0.0',
-    cors: {
-      allowedOrigins: [
-        'https://heredity-matcher-ihp.vercel.app',
-        'http://localhost:3000',
-        process.env.CLIENT_URL
-      ].filter(Boolean)
-    }
-  });
-});
 
-// Debug endpoint to test auth (no auth required)
 app.get('/api/test-auth', (req, res) => {
   const authHeader = req.headers.authorization;
   res.json({
@@ -102,7 +79,7 @@ app.get('/api/test-auth', (req, res) => {
   });
 });
 
-// Debug endpoint to test protected route
+
 app.get('/api/test-protected', verifyToken, (req, res) => {
   res.json({
     success: true,

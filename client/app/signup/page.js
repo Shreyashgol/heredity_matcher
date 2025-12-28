@@ -102,7 +102,6 @@ function SignupContent() {
             </div>
           )}
 
-          {/* Google Sign Up Button */}
           <button
             onClick={handleGoogleSignup}
             type="button"

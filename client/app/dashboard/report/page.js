@@ -21,7 +21,6 @@ function ReportPageContent() {
   const [loadingTree, setLoadingTree] = useState(false);
 
   useEffect(() => {
-    // Validate token exists
     const token = localStorage.getItem('token');
     if (!token) {
       router.push('/login');
@@ -90,9 +89,7 @@ function ReportPageContent() {
       );
 
       if (response.data.success) {
-        // Check if response contains base64 (production) or URL (development)
         if (response.data.data.base64) {
-          // Production: Download from base64
           const base64 = response.data.data.base64;
           const byteCharacters = atob(base64);
           const byteNumbers = new Array(byteCharacters.length);
@@ -110,7 +107,6 @@ function ReportPageContent() {
           document.body.removeChild(link);
           URL.revokeObjectURL(link.href);
         } else {
-          // Development: Download from URL
           const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}${response.data.data.url}`;
           const link = document.createElement('a');
           link.href = downloadUrl;

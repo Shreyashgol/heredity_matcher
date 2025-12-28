@@ -86,7 +86,6 @@ function LoginContent() {
             </div>
           )}
 
-          {/* Google Sign In Button */}
           <button
             onClick={handleGoogleLogin}
             type="button"
