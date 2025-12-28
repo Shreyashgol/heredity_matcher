@@ -5,9 +5,15 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Environment variables 
+# Environment variables (CRITICAL - NEVER COMMIT THESE!)
 .env
+.env.local
+.env.*.local
 *.env
+!.env.example
+!.env.local.example
+server/.env
+client/.env.local
 
 # Build outputs
 dist/
@@ -19,6 +25,7 @@ out/
 *.log
 reports/*.pdf
 server/reports/
+*.pdf
 
 # OS files
 .DS_Store

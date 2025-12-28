@@ -7,6 +7,18 @@
 [![PostgreSQL](https://img.shields.io/badge/postgresql-14-blue)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
+## 🚀 Current Status
+
+✅ **Server Running** - Port 5001  
+✅ **Client Running** - Port 3000  
+✅ **Authentication Working** - Register/Login functional  
+✅ **CORS Configured** - Cross-origin requests enabled  
+✅ **Database Connected** - PostgreSQL operational  
+✅ **PDF Generation** - Report downloads working  
+🔄 **AI Reports** - Gemini API with fallback system  
+
+**Quick Start**: See [QUICK_START.md](QUICK_START.md) | **Auth Issues**: See [AUTHENTICATION_FIX.md](AUTHENTICATION_FIX.md)
+
 ---
 
 ## 📋 Table of Contents
