@@ -1,7 +1,3 @@
-/**
- * Generate ASCII art representation of family tree for PDF reports
- */
-
 const generateTreeTextRepresentation = (treeData, patientName) => {
   if (!treeData || treeData.length === 0) {
     return 'No family tree data available';
@@ -73,9 +69,7 @@ const generateTreeTextRepresentation = (treeData, patientName) => {
   return treeText;
 };
 
-/**
- * Generate detailed family tree summary
- */
+
 const generateFamilyTreeSummary = (treeData, patientName, condition) => {
   if (!treeData || treeData.length === 0) {
     return 'No family tree data available';

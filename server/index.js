@@ -5,11 +5,12 @@ const session = require('express-session');
 const passport = require('./config/passport');
 
 dotenv.config();
+const client_url = process.env.CLIENT_URL
 
 const app = express();
 
 app.use(cors({
-  origin: 'https://heredity-matcher-c9sd.vercel.app',
+  origin: `${client_url}`,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

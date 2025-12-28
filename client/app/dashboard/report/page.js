@@ -6,7 +6,7 @@ import axios from 'axios';
 import Link from 'next/link';
 import ReportFamilyTree from '@/components/ReportFamilyTree';
 
-const API_URL = 'https://heredity-matcher.vercel.app';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
 function ReportPageContent() {
   const router = useRouter();
