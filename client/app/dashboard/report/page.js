@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
@@ -8,7 +8,7 @@ import ReportFamilyTree from '@/components/ReportFamilyTree';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
-export default function ReportPage() {
+function ReportPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -403,5 +403,20 @@ export default function ReportPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function ReportPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading report...</p>
+        </div>
+      </div>
+    }>
+      <ReportPageContent />
+    </Suspense>
   );
 }
