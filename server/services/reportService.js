@@ -5,9 +5,12 @@ const { generateTreeTextRepresentation, generateFamilyTreeSummary } = require('.
 
 const generatePDFReport = async (reportData) => {
   try {
-    // Create reports directory if it doesn't exist
-    const reportsDir = path.join(__dirname, '../reports');
-    if (!fs.existsSync(reportsDir)) {
+    // Use /tmp directory in production (Vercel), local reports directory in development
+    const isProduction = process.env.NODE_ENV === 'production';
+    const reportsDir = isProduction ? '/tmp' : path.join(__dirname, '../reports');
+    
+    // Create reports directory if it doesn't exist (only needed in development)
+    if (!isProduction && !fs.existsSync(reportsDir)) {
       fs.mkdirSync(reportsDir, { recursive: true });
     }
 
@@ -64,12 +67,36 @@ const generatePDFReport = async (reportData) => {
 
     return new Promise((resolve, reject) => {
       stream.on('finish', () => {
-        resolve({
-          success: true,
-          filename: filename,
-          filepath: filepath,
-          url: `/reports/${filename}`
-        });
+        // In production, read the file and return as base64
+        if (isProduction) {
+          try {
+            const pdfBuffer = fs.readFileSync(filepath);
+            const base64PDF = pdfBuffer.toString('base64');
+            
+            // Clean up the temp file
+            fs.unlinkSync(filepath);
+            
+            resolve({
+              success: true,
+              filename: filename,
+              base64: base64PDF,
+              contentType: 'application/pdf'
+            });
+          } catch (err) {
+            reject({
+              success: false,
+              error: 'Failed to read generated PDF: ' + err.message
+            });
+          }
+        } else {
+          // In development, return file URL
+          resolve({
+            success: true,
+            filename: filename,
+            filepath: filepath,
+            url: `/reports/${filename}`
+          });
+        }
       });
 
       stream.on('error', (err) => {

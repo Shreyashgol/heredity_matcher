@@ -90,14 +90,35 @@ function ReportPageContent() {
       );
 
       if (response.data.success) {
-        // Download the PDF
-        const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}${response.data.data.url}`;
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = response.data.data.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Check if response contains base64 (production) or URL (development)
+        if (response.data.data.base64) {
+          // Production: Download from base64
+          const base64 = response.data.data.base64;
+          const byteCharacters = atob(base64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/pdf' });
+          
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = response.data.data.filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+        } else {
+          // Development: Download from URL
+          const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}${response.data.data.url}`;
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = response.data.data.filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
 
         setExportSuccess(true);
         setTimeout(() => setExportSuccess(false), 3000);
